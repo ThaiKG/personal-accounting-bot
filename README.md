@@ -1,1 +1,5 @@
-yo
+# WORK IN PROGRESS
+
+### INTENDED FINAL FEATURES
+
+- Track spending
