@@ -1,4 +1,3 @@
-const { KnownNetworkErrorCodes } = require("discord.js");
 const { Schema, model } = require("mongoose");
 
 const balanceSchema = new Schema({

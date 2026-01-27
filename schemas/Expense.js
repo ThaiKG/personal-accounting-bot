@@ -1,4 +1,3 @@
-const { AutoModerationRule } = require("discord.js");
 const { Schema, model } = require("mongoose");
 
 const expenseSchema = new Schema({
@@ -16,10 +15,6 @@ const expenseSchema = new Schema({
     },
     participants: {
         type: [String],
-        required: true,
-    },
-    splitAmount: {
-        type: Number,
         required: true,
     },
     date: {
