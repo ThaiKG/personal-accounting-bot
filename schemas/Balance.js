@@ -24,3 +24,5 @@ const balanceSchema = new Schema({
         default: Date.now,
     },
 });
+
+module.exports = model("Balance", balanceSchema);
