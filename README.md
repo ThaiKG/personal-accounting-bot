@@ -2,4 +2,6 @@
 
 ### INTENDED FINAL FEATURES
 
-- Track spending
+- Track spending and debts
+- Allow paying off debts
+- Some humor
