@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require("discord.js");
-const { cooldown } = require("./ping");
+const fs = require("node:fs");
+const path = require("node:path");
 
 module.exports = {
     cooldown: 5,
@@ -25,11 +26,42 @@ module.exports = {
             });
         }
 
-        delete require.cache[require.resolve(`./${commandName}.js`)];
+        // Find the command file in any subfolder
+        const foldersPath = path.join(__dirname, "..");
+        const commandFolders = fs.readdirSync(foldersPath);
+
+        let commandPath = null;
+        for (const folder of commandFolders) {
+            const commandsPath = path.join(foldersPath, folder);
+            const commandFiles = fs
+                .readdirSync(commandsPath)
+                .filter((file) => file.endsWith(".js"));
+
+            for (const file of commandFiles) {
+                if (file.toLowerCase() === `${commandName}.js`) {
+                    commandPath = path.join(commandsPath, file);
+                    break;
+                }
+            }
+            if (commandPath) break;
+        }
+
+        if (!commandPath) {
+            return interaction.reply({
+                content: `Could not find command file for \`${commandName}\`!`,
+                ephemeral: true,
+            });
+        }
+
+        // Delete from cache and reload
+        delete require.cache[require.resolve(commandPath)];
+
         try {
-            const newCommand = require(`./${commandName}.js`);
+            const newCommand = require(commandPath);
             interaction.client.commands.set(commandName, newCommand);
-            await interaction.reply(`Command \`${commandName}\` was reloaded!`);
+            await interaction.reply(
+                `Command \`${commandName}\` was reloaded successfully!`,
+            );
         } catch (error) {
             console.error(error);
             await interaction.reply({
