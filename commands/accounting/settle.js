@@ -93,6 +93,21 @@ module.exports = {
             }
 
             await session.commitTransaction();
+
+            // Calculate remaining debt after settlement
+            const remainingDebt = totalOwed - amount;
+
+            // Build response message
+            let message = `Settlement recorded!\n`;
+            message += `You paid <@${toUser}> $${amount.toFixed(2)}\n\n`;
+
+            if (remainingDebt > 0.01) {
+                message += `Remaining debt to <@${toUser}>: $${remainingDebt.toFixed(2)}`;
+            } else {
+                message += `All debts to <@${toUser}> are now settled!`;
+            }
+
+            await interaction.reply(message);
         } catch (error) {
             await session.abortTransaction();
             console.error("Settlement error:", error);
