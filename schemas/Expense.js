@@ -50,7 +50,8 @@ expenseSchema.methods.isSettledBy = function (userId) {
     const userSettlements = this.settlements.filter((s) => s.userId === userId);
     const totalPaid = userSettlements.reduce((sum, s) => sum + s.amountPaid, 0);
 
-    return totalPaid >= splitAmount;
+    // Use tolerance for floating-point comparison (within 1 cent)
+    return totalPaid >= splitAmount - 0.01;
 };
 
 // Virtual property to check if expense is fully settled by all participants
@@ -61,6 +62,10 @@ expenseSchema.virtual("isFullySettled").get(function () {
     return owingParticipants.every((p) => this.isSettledBy(p));
 });
 
+// Enable virtuals in JSON output
+expenseSchema.set("toJSON", { virtuals: true });
+expenseSchema.set("toObject", { virtuals: true });
+
 // Method to get remaining amount owed by a specific participant
 expenseSchema.methods.getRemainingAmount = function (userId) {
     if (userId === this.paidBy) return 0;
@@ -69,7 +74,9 @@ expenseSchema.methods.getRemainingAmount = function (userId) {
     const userSettlements = this.settlements.filter((s) => s.userId === userId);
     const totalPaid = userSettlements.reduce((sum, s) => sum + s.amountPaid, 0);
 
-    return Math.max(0, splitAmount - totalPaid);
+    const remaining = splitAmount - totalPaid;
+    // Round to 2 decimal places to avoid floating-point precision issues
+    return Math.max(0, Math.round(remaining * 100) / 100);
 };
 
 module.exports = model("Expense", expenseSchema);

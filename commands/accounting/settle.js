@@ -80,16 +80,18 @@ module.exports = {
 
                 const owed = expense.getRemainingAmount(fromUser);
                 const paymentAmount = Math.min(owed, remainingAmount);
+                // Round to 2 decimal places before saving
+                const roundedPayment = Math.round(paymentAmount * 100) / 100;
 
                 //Add settlement record to expense
                 expense.settlements.push({
                     userId: fromUser,
-                    amountPaid: paymentAmount,
+                    amountPaid: roundedPayment,
                     date: new Date(),
                 });
 
                 await expense.save({ session });
-                remainingAmount -= paymentAmount;
+                remainingAmount -= roundedPayment;
             }
 
             await session.commitTransaction();
