@@ -5,18 +5,24 @@ const Balance = require("../../schemas/Balance");
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName("addexpense")
-        .setDescription("Add an expense you paid for")
+        .setName("add-expense")
+        .setDescription("Add an expense that was paid for")
         .addNumberOption((option) =>
             option
                 .setName("amount")
-                .setDescription("Amount you paid")
+                .setDescription("Amount paid")
+                .setRequired(true),
+        )
+        .addUserOption((option) =>
+            option
+                .setName("paidby")
+                .setDescription("Who paid for this expense")
                 .setRequired(true),
         )
         .addUserOption((option) =>
             option
                 .setName("split1")
-                .setDescription("Person to split with (including yourself)")
+                .setDescription("Person to split with (including payer)")
                 .setRequired(true),
         )
         .addUserOption((option) =>
@@ -50,7 +56,7 @@ module.exports = {
                 .setRequired(false),
         ),
     async execute(interaction) {
-        const paidBy = interaction.user.id; // Person running the command
+        const paidBy = interaction.options.getUser("paidby").id;
         const amount = interaction.options.getNumber("amount");
         const description =
             interaction.options.getString("description") ||
