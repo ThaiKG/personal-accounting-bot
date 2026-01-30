@@ -54,13 +54,20 @@ module.exports = {
         let netBalance = 0;
 
         for (const [otherUserId, amount] of Object.entries(debts)) {
-            if (amount > 0) {
+            if (amount > 0.01) {
+                // Only count if more than 1 cent
                 youAreOwed.push({ userId: otherUserId, amount });
                 netBalance += amount;
-            } else if (amount < 0) {
+            } else if (amount < -0.01) {
+                // Only count if more than 1 cent
                 youOwe.push({ userId: otherUserId, amount: Math.abs(amount) });
                 netBalance += amount; // amount is already negative
             }
+        }
+
+        // Fix floating point precision issues (avoid -0)
+        if (Math.abs(netBalance) < 0.01) {
+            netBalance = 0;
         }
 
         const embed = new EmbedBuilder()
