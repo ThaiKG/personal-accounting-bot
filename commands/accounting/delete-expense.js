@@ -6,18 +6,39 @@ const Balance = require("../../schemas/Balance");
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("delete-expense")
-        .setDescription("Delete your most recent expense"),
-    async execute(interaction) {
-        const userId = interaction.user.id;
+        .setDescription("Delete an expense by selecting from the list")
+        .addStringOption((option) =>
+            option
+                .setName("expense")
+                .setDescription("Select expense to delete")
+                .setRequired(true)
+                .setAutocomplete(true),
+        ),
+    async autocomplete(interaction) {
+        try {
+            // Get recent expenses (limit to 25 for autocomplete)
+            const expenses = await Expense.find().sort({ date: -1 }).limit(25);
 
-        // Find user's most recent expense
-        const expense = await Expense.findOne({ paidBy: userId })
-            .sort({ date: -1 })
-            .limit(1);
+            const choices = expenses.map((exp) => ({
+                name: `$${exp.amount.toFixed(2)} - ${exp.description || "No desc"} - Paid by: ${exp.paidBy.slice(0, 8)}... (${exp.date.toLocaleDateString()})`,
+                value: exp._id.toString(),
+            }));
+
+            await interaction.respond(choices);
+        } catch (error) {
+            console.error("Autocomplete error:", error);
+            await interaction.respond([]);
+        }
+    },
+    async execute(interaction) {
+        const expenseId = interaction.options.getString("expense");
+
+        // Find the expense by ID
+        const expense = await Expense.findById(expenseId);
 
         if (!expense) {
             return interaction.reply({
-                content: "You have no expenses to delete!",
+                content: "Expense not found!",
                 ephemeral: true,
             });
         }
