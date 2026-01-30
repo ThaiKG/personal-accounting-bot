@@ -59,7 +59,7 @@ module.exports = {
                 netBalance += amount;
             } else if (amount < 0) {
                 youOwe.push({ userId: otherUserId, amount: Math.abs(amount) });
-                netBalance -= amount;
+                netBalance += amount; // amount is already negative
             }
         }
 
